@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+@source '.../.../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '.../.../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+
+button#retour {
+    margin-top: 10px;
+    margin-left: 5px;
+    height: 40px;
+    background: transparent;
+    color: black;
+    border-color: white;
+}
+
+button#retour:hover {
+    box-shadow: 0 5px 15px rgba(6, 6, 7, 0.2);
+    transform: translateY(-3px);
+    transition: 0.3s;
+}
+
+
+
+body {
+    cursor: default;
+}
+
+div#menu {
+    margin-left: 220px;
+}
