@@ -156,15 +156,17 @@
                         <th>Paiement</th>
                         <th>Avance (Ar)</th>
                         <th>Reste (Ar)</th>
+                        <th>Statut</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($reservations as $r)
                     @php
-                        $frais  = $r->voiture ? $r->voiture->frais : 0;
-                        $avance = $r->montant_avance;
-                        $reste  = ($r->payement == 'tout payé') ? 0 : $frais - $avance;
+                        $frais    = $r->voiture ? $r->voiture->frais : 0;
+                        $avance   = $r->montant_avance;
+                        $reste    = ($r->payement == 'tout payé') ? 0 : $frais - $avance;
+                        $termine  = \Carbon\Carbon::parse($r->date_voyage)->lt(\Carbon\Carbon::today());
                     @endphp
                     <tr>
                         <td>{{ $r->idreserv }}</td>
@@ -185,14 +187,46 @@
                         <td>{{ number_format($avance, 0, ',', '.') }}</td>
                         <td>{{ number_format($reste, 0, ',', '.') }}</td>
                         <td>
+                            @if($termine)
+                                <span class="badge bg-secondary">Terminé</span>
+                            @else
+                                <span class="badge bg-primary">À venir</span>
+                            @endif
+                        </td>
+                        <td>
                             <div class="d-flex gap-1">
                                 <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
                                     data-bs-target="#editModal{{ $r->idreserv }}">Modifier</button>
                                 <a href="{{ route('reservation.recu', $r->idreserv) }}"
                                     class="btn btn-secondary btn-sm" target="_blank">Reçu</a>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal{{ $r->idreserv }}">Supprimer</button>
                             </div>
                         </td>
                     </tr>
+
+                    <div class="modal fade" id="deleteModal{{ $r->idreserv }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Supprimer la réservation {{ $r->idreserv }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Voulez-vous vraiment supprimer cette réservation ?
+                                    La place N° {{ $r->place }} de la voiture {{ $r->idvoit }} sera libérée.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <form method="POST" action="{{ route('reservation.destroy', $r->idreserv) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="modal fade" id="editModal{{ $r->idreserv }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
@@ -270,7 +304,7 @@
                     </div>
                     @empty
                     <tr>
-                        <td colspan="11" class="text-center text-muted">Aucune réservation enregistrée.</td>
+                        <td colspan="12" class="text-center text-muted">Aucune réservation enregistrée.</td>
                     </tr>
                     @endforelse
                 </tbody>

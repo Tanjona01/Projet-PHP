@@ -92,8 +92,12 @@
                         <td>{{ $voiture->nbrplace }}</td>
                         <td>{{ number_format($voiture->frais, 0, ',', '.') }}</td>
                         <td>
-                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#editModal{{ $voiture->idvoit }}">Modifier</button>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#editModal{{ $voiture->idvoit }}">Modifier</button>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal{{ $voiture->idvoit }}">Supprimer</button>
+                            </div>
                         </td>
                     </tr>
                     <div class="modal fade" id="editModal{{ $voiture->idvoit }}" tabindex="-1">
@@ -136,6 +140,28 @@
                                         <button type="submit" class="btn btn-success">Mettre à jour</button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="deleteModal{{ $voiture->idvoit }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Supprimer voiture {{ $voiture->idvoit }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Voulez-vous vraiment supprimer la voiture <b>{{ $voiture->design }}</b> ?
+                                    Ses places et ses réservations seront supprimées définitivement.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <form method="POST" action="{{ route('voiture.destroy', $voiture->idvoit) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>

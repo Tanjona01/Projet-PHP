@@ -93,8 +93,12 @@
                         <td><?php echo e($voiture->nbrplace); ?></td>
                         <td><?php echo e(number_format($voiture->frais, 0, ',', '.')); ?></td>
                         <td>
-                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#editModal<?php echo e($voiture->idvoit); ?>">Modifier</button>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#editModal<?php echo e($voiture->idvoit); ?>">Modifier</button>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal<?php echo e($voiture->idvoit); ?>">Supprimer</button>
+                            </div>
                         </td>
                     </tr>
                     <div class="modal fade" id="editModal<?php echo e($voiture->idvoit); ?>" tabindex="-1">
@@ -137,6 +141,28 @@
                                         <button type="submit" class="btn btn-success">Mettre à jour</button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="deleteModal<?php echo e($voiture->idvoit); ?>" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Supprimer voiture <?php echo e($voiture->idvoit); ?></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Voulez-vous vraiment supprimer la voiture <b><?php echo e($voiture->design); ?></b> ?
+                                    Ses places et ses réservations seront supprimées définitivement.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <form method="POST" action="<?php echo e(route('voiture.destroy', $voiture->idvoit)); ?>">
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('DELETE'); ?>
+                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>

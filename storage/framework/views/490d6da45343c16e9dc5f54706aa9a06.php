@@ -157,15 +157,17 @@
                         <th>Paiement</th>
                         <th>Avance (Ar)</th>
                         <th>Reste (Ar)</th>
+                        <th>Statut</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php $__empty_1 = true; $__currentLoopData = $reservations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <?php
-                        $frais  = $r->voiture ? $r->voiture->frais : 0;
-                        $avance = $r->montant_avance;
-                        $reste  = ($r->payement == 'tout payé') ? 0 : $frais - $avance;
+                        $frais    = $r->voiture ? $r->voiture->frais : 0;
+                        $avance   = $r->montant_avance;
+                        $reste    = ($r->payement == 'tout payé') ? 0 : $frais - $avance;
+                        $termine  = \Carbon\Carbon::parse($r->date_voyage)->lt(\Carbon\Carbon::today());
                     ?>
                     <tr>
                         <td><?php echo e($r->idreserv); ?></td>
@@ -187,14 +189,46 @@
                         <td><?php echo e(number_format($avance, 0, ',', '.')); ?></td>
                         <td><?php echo e(number_format($reste, 0, ',', '.')); ?></td>
                         <td>
+                            <?php if($termine): ?>
+                                <span class="badge bg-secondary">Terminé</span>
+                            <?php else: ?>
+                                <span class="badge bg-primary">À venir</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
                             <div class="d-flex gap-1">
                                 <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
                                     data-bs-target="#editModal<?php echo e($r->idreserv); ?>">Modifier</button>
                                 <a href="<?php echo e(route('reservation.recu', $r->idreserv)); ?>"
                                     class="btn btn-secondary btn-sm" target="_blank">Reçu</a>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal<?php echo e($r->idreserv); ?>">Supprimer</button>
                             </div>
                         </td>
                     </tr>
+
+                    <div class="modal fade" id="deleteModal<?php echo e($r->idreserv); ?>" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Supprimer la réservation <?php echo e($r->idreserv); ?></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Voulez-vous vraiment supprimer cette réservation ?
+                                    La place N° <?php echo e($r->place); ?> de la voiture <?php echo e($r->idvoit); ?> sera libérée.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <form method="POST" action="<?php echo e(route('reservation.destroy', $r->idreserv)); ?>">
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('DELETE'); ?>
+                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="modal fade" id="editModal<?php echo e($r->idreserv); ?>" tabindex="-1">
                         <div class="modal-dialog modal-lg">
@@ -274,7 +308,7 @@
                     </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
-                        <td colspan="11" class="text-center text-muted">Aucune réservation enregistrée.</td>
+                        <td colspan="12" class="text-center text-muted">Aucune réservation enregistrée.</td>
                     </tr>
                     <?php endif; ?>
                 </tbody>
