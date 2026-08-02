@@ -74,4 +74,15 @@ class voiturecontroller extends Controller
 
         return redirect()->back()->with('success', 'Voiture mise à jour !');
     }
+
+    public function destroy($id)
+    {
+        $voiture = voiture::findOrFail($id);
+
+        \App\Models\reservation::where('idvoit', $id)->delete();
+        place::where('idvoit', $id)->delete();
+        $voiture->delete();
+
+        return redirect()->back()->with('success', 'Voiture supprimée !');
+    }
 }

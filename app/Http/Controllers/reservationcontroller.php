@@ -10,8 +10,21 @@ use App\Models\client;
 
 class reservationcontroller extends Controller
 {
+    private function libererPlacesTerminees(): void
+    {
+        $terminees = reservation::where('date_voyage', '<', now()->toDateString())->get();
+        foreach ($terminees as $r) {
+            place::where('idvoit', $r->idvoit)
+                 ->where('place', $r->place)
+                 ->where('occupation', 'oui')
+                 ->update(['occupation' => 'non']);
+        }
+    }
+
     public function index()
     {
+        $this->libererPlacesTerminees();
+
         $reservations = reservation::with(['voiture', 'client'])->get();
         $voitures = voiture::all();
         $clients = client::all();
@@ -106,6 +119,8 @@ class reservationcontroller extends Controller
 
     public function placesLibres($idvoit)
     {
+        $this->libererPlacesTerminees();
+
         $places = place::where('idvoit', $idvoit)
                        ->where('occupation', 'non')
                        ->orderBy('place')
@@ -138,5 +153,18 @@ class reservationcontroller extends Controller
     {
         $reservation = reservation::with(['voiture', 'client'])->findOrFail($id);
         return view('recu', compact('reservation'));
+    }
+
+    public function destroy($id)
+    {
+        $resa = reservation::findOrFail($id);
+
+        place::where('idvoit', $resa->idvoit)
+             ->where('place', $resa->place)
+             ->update(['occupation' => 'non']);
+
+        $resa->delete();
+
+        return back()->with('success', 'Réservation supprimée, la place a été libérée.');
     }
 }
